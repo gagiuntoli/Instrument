@@ -1,6 +1,5 @@
 /*
- *  This source code is part of MicroC: a finite element code
- *  to solve microstructural problems for composite materials.
+ *  This source code is part of Instrument
  *
  *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
  *

@@ -7,11 +7,15 @@ The implementation is based on linked list to store the profile of every functio
 
 # Usage
 
-The usage is very simple. It is needed first to include the header `instrument.h` in the program
-to profile and then the macros `INST_START` and `INST_END` should be placed at the beginning and
- end of the function where the elapsed time want to be measured, i.e.: 
+The usage is very simple. The example shows the basic use:
 
 ```c
+#include "instrumentation.h"
+#include <stdint.h>
+#include <stdlib.h>
+
+#define N 1000000
+
 int func_1(void)
 {
 	INST_START
@@ -24,8 +28,23 @@ int func_1(void)
 
 	return j;
 }
+
+int main(void)
+{
+	int sol;
+
+	sol = func_1();
+	sol = func_1();
+	sol = func_1();
+
+
+	INST_PRINT
+}
 ```
 
+The macros `INST_START` and `INST_END` should be placed at the beginning and end of the 
+function where the elapsed time want to be measured and `INST_PRINT` should be located 
+where the information is going to be printed to `stdout`.
 
 More simple and easy to understand examples of the usage of this library can be found in the `test` folder.
 
