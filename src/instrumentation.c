@@ -1,5 +1,5 @@
 /*
- *  This source code is part of Instrument
+ *  This source code is part of the Instrument library.
  *
  *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
  *
@@ -20,7 +20,7 @@
 #include "instrumentation.h"
 
 
-function_t *fun_array = NULL;
+static function_t *fun_array = NULL;
 
 
 tnode_t *create_time_stamp(void)
@@ -128,6 +128,10 @@ int get_total_calls(int func_id)
 	return calls;
 }
 
+void free_tlist(tnode_t *thead)
+{
+	return;
+}
 
 void instrument_print(void)
 {
@@ -139,6 +143,12 @@ void instrument_print(void)
 		int calls = get_total_calls(id);
 		printf("%-16s :\t%d\t%d\n", fun_array[id].name, time, calls);
 		id ++;
+	}
+
+	// Free all memory
+	for (id = 0; id < MAX_FUNC; ++id) {
+		free (fun_array[id].name);
+		free_tlist(fun_array[id].thead);
 	}
 	return;
 }

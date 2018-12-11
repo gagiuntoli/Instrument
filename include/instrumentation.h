@@ -1,5 +1,5 @@
 /*
- *  This source code is part Instrument
+ *  This source code is part of the Instrument library.
  *
  *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
  *
@@ -27,11 +27,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 #define MAX_FUNC 50 // Maximum number of functions to instrument
 
 #define INST_START int magic_1945 = instrument_start(__COUNTER__, __FUNCTION__);
 #define INST_END   instrument_end(magic_1945);
 #define INST_PRINT instrument_print();
+
 
 struct tnode_t_ {
 
@@ -51,7 +53,6 @@ typedef struct {
 
 } function_t;
 
-extern function_t *fun_array;
 
 tnode_t *create_time_stamp(void);
 void create_function(int func_id, const char *fname);
@@ -62,5 +63,6 @@ void instrument_print(void);
 
 clock_t get_total_time(int func_id);
 int get_total_calls(int func_id);
+
 
 #endif

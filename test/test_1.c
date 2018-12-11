@@ -1,6 +1,5 @@
 /*
- *  This source code is part of MicroC: a finite element code
- *  to solve microstructural problems for composite materials.
+ *  This source code is part of Instrument library.
  *
  *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
  *
@@ -22,6 +21,7 @@
 #include "instrumentation.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #define N 1000000
 
@@ -45,6 +45,9 @@ int main(void)
 	sol = func_1();
 	sol = func_1();
 	sol = func_1();
+
+	int calls_func_1 = get_total_calls(0);
+	assert(calls_func_1 == 3);
 
 	INST_PRINT
 }
