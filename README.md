@@ -45,8 +45,13 @@ where the information is going to be printed to `stdout`.
 After compiling and run the code the output should be approximately:
 
 ```bash
-Function        Time    Calls
-func_1 :        15265   3
+
+------------------------------------------------------------
+Instrument
+------------------------------------------------------------
+Function                Time            Calls           Mean            Stdev[%]
+func_1           :      0.012215        3               0.004072        0.025676
+
 ```
 
 More simple and easy to understand examples of the usage of this library can be found in the `test` folder.
