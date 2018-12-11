@@ -28,8 +28,7 @@ tnode_t *create_time_stamp(void)
 	tnode_t *tp = malloc(sizeof(tnode_t));
 
 	tp->next = NULL;
-	tp->tstart = clock();
-	tp->dtime = -1;
+	clock_gettime(CLOCK_MONOTONIC, &tp->start);
 
 	return tp;
 }
@@ -91,22 +90,22 @@ void instrument_end(int func_id)
 	while (tp->next != NULL)
 		tp = tp->next;
 
-	tp->dtime = clock() - tp->tstart;
+	clock_gettime(CLOCK_MONOTONIC, &tp->end);
 
 	return;
 }
 
 
-clock_t get_total_time(int func_id)
+long get_total_time(int func_id)
 {
 	if (func_id < 0 || func_id >= MAX_FUNC)
 		return -1;
 
-	clock_t total = 0;
+	long total = 0;
 
 	tnode_t *tp = fun_array[func_id].thead;
 	while (tp != NULL) {
-		total += tp->dtime;
+		total += tp->end.tv_nsec - tp->start.tv_nsec;
 		tp = tp->next;
 	}
 	return total;
@@ -137,13 +136,15 @@ void free_tlist(tnode_t *thead)
 
 void instrument_print(void)
 {
-	printf("Function         \tTime\tCalls\tMean\n");
+	printf("Function         \tTime\t\tCalls\t\tMean\n");
 
 	int id = 0;
 	while (fun_array[id].name != NULL) {
-		clock_t time = get_total_time(id);
+		double time = ((double) get_total_time(id)) * 1.0e-9;
 		int calls = get_total_calls(id);
-		printf("%-16s :\t%d\t%d\n", fun_array[id].name, time, calls);
+		double mean = time / calls;
+		printf("%-16s :\t%lf\t%d\t\t%lf\n", fun_array[id].name, 
+		       time, calls, mean);
 		id ++;
 	}
 

@@ -38,8 +38,6 @@
 struct tnode_t_ {
 
 	struct tnode_t_ *next;
-	clock_t tstart;
-	clock_t dtime;
 	struct timespec start, end;
 
 };
@@ -62,7 +60,7 @@ int instrument_start(int func_id, const char *fname);
 void instrument_end(int func_id);
 void instrument_print(void);
 
-clock_t get_total_time(int func_id);
+long get_total_time(int func_id);
 int get_total_calls(int func_id);
 
 
