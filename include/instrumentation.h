@@ -40,6 +40,7 @@ struct tnode_t_ {
 	struct tnode_t_ *next;
 	clock_t tstart;
 	clock_t dtime;
+	struct timespec start, end;
 
 };
 

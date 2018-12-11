@@ -128,10 +128,12 @@ int get_total_calls(int func_id)
 	return calls;
 }
 
+
 void free_tlist(tnode_t *thead)
 {
 	return;
 }
+
 
 void instrument_print(void)
 {

@@ -6,6 +6,7 @@ set(testsources
 	test_1.c
 	test_2.c
 	test_3.c
+	test_clock_vs_clock_gettime.c
 	)
 
 # Iterate over the list above
@@ -22,3 +23,4 @@ endforeach ()
 add_test(NAME test_1 COMMAND test_1)
 add_test(NAME test_2 COMMAND test_2)
 add_test(NAME test_3 COMMAND test_3)
+add_test(NAME test_clock_vs_clock_gettime COMMAND test_clock_vs_clock_gettime)
