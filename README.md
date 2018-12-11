@@ -37,7 +37,6 @@ int main(void)
 	sol = func_1();
 	sol = func_1();
 
-
 	INST_PRINT
 }
 ```
@@ -45,6 +44,13 @@ int main(void)
 The macros `INST_START` and `INST_END` should be placed at the beginning and end of the 
 function where the elapsed time want to be measured and `INST_PRINT` should be located 
 where the information is going to be printed to `stdout`.
+
+After compiling and run the code the output should be approximately:
+
+```bash
+Function        Time    Calls
+func_1 :        15265   3
+```
 
 More simple and easy to understand examples of the usage of this library can be found in the `test` folder.
 

@@ -23,28 +23,56 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define N 1000000
+#define N 100000
 
 int func_1(void)
 {
 	INST_START
 
-	int i, j = 0;
-	for (i = 0; i < N; ++i)
-		j =+ i;
+	int i, k, j = 0;
+	for (k = 0; k < 100; ++k) {
+		for (i = 0; i < N; ++i)
+			j += i;
+		for (i = 0; i < N; ++i)
+			j -= i;
+	}
 
 	INST_END
 
 	return j;
 }
 
+
+int func_2(void)
+{
+	INST_START
+
+	int i, j = 0;
+	for (i = 0; i < N; ++i)
+		j += i;
+	for (i = 0; i < N; ++i)
+		j -= i;
+
+	INST_END
+
+	return j;
+}
+
+
 int main(void)
 {
+	INST_START
+
 	int sol;
 
 	sol = func_1();
+	sol = func_2();
 	sol = func_1();
-	sol = func_1();
+	sol = func_2();
+	sol = func_2();
+	sol = func_2();
+
+	INST_END
 
 	INST_PRINT
 }

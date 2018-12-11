@@ -136,11 +136,11 @@ int get_total_calls(fnode_t *fp)
 void instrument_print(void)
 {
 	fnode_t *fp = fhead;
-	printf("Function\tTime\tCalls\n");
+	printf("Function         \tTime\tCalls\n");
 	while (fp != NULL) {
 		clock_t time = get_total_time(fp);
 		int calls = get_total_calls(fp);
-		printf("%s :\t%d\t%d\n", fp->name, time, calls);
+		printf("%-16s :\t%d\t%d\n", fp->name, time, calls);
 
 		fp = fp->next;
 	}

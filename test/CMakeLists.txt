@@ -4,6 +4,8 @@ set(CMAKE_BUILD_TYPE Debug)
 # The test files I care only (create a list)
 set(testsources
 	test_1.c
+	test_2.c
+	test_3.c
 	)
 
 # Iterate over the list above
@@ -18,3 +20,5 @@ endforeach ()
 
 # Add a test that requires arguments
 add_test(NAME test_1 COMMAND test_1)
+add_test(NAME test_2 COMMAND test_2)
+add_test(NAME test_3 COMMAND test_3)
