@@ -55,8 +55,14 @@ struct fnode_t_ {
 typedef struct fnode_t_ fnode_t;
 
 
+tnode_t *create_time_stamp(void);
+fnode_t *create_function(int func_id, const char *fname);
+
 int instrument_start(int func_id, const char *fname);
 void instrument_end(int func_id);
 void instrument_print(void);
+
+clock_t get_total_time(fnode_t *fp);
+int get_total_calls(fnode_t *fp);
 
 #endif
