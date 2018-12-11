@@ -23,20 +23,29 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define N 100000
+#define N 1000000
 
 int func_1(void)
 {
 	INST_START
 
-	int i = 1945 * 878;
+	int i, j;
+	for (i = 0; i < N; ++i)
+		j =+ i;
 
 	INST_END
 
-	return i;
+	return j;
 }
 
 int main(void)
 {
-	int sol = func_1();
+	int sol;
+
+	sol = func_1();
+	sol = func_1();
+	sol = func_1();
+
+
+	INST_PRINT
 }

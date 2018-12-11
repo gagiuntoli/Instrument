@@ -26,10 +26,12 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 
-#define INST_START int magic_1945 = take_time_1(__COUNTER__, __FUNCTION__);
-#define INST_END   take_time_2(magic_1945);
+#define INST_START int magic_1945 = instrument_start(__COUNTER__, __FUNCTION__);
+#define INST_END   instrument_end(magic_1945);
+#define INST_PRINT instrument_print();
 
 
 struct tnode_t_ {
@@ -54,7 +56,8 @@ struct fnode_t_ {
 typedef struct fnode_t_ fnode_t;
 
 
-int take_time_1(int func_id, const char *fname);
-void take_time_2(int func_id);
+int instrument_start(int func_id, const char *fname);
+void instrument_end(int func_id);
+void instrument_print(void);
 
 #endif

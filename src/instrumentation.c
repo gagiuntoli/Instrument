@@ -23,6 +23,7 @@
 
 fnode_t *fhead = NULL;
 
+
 tnode_t *create_time_stamp(void)
 {
 	tnode_t *tp = malloc(sizeof(tnode_t));
@@ -50,7 +51,7 @@ fnode_t *create_function(int func_id, const char *fname)
 }
 
 
-int take_time_1(int func_id, const char *fname)
+int instrument_start(int func_id, const char *fname)
 {
 	if (fhead == NULL) {
 
@@ -59,34 +60,32 @@ int take_time_1(int func_id, const char *fname)
 		return func_id;
 	}
 
-	fnode_t *f_ptr = fhead;
-	while (f_ptr->next != NULL && f_ptr->id != func_id)
-		f_ptr = f_ptr->next;
+	fnode_t *fp = fhead;
+	while (fp->next != NULL && fp->id != func_id)
+		fp = fp->next;
 
-	if (f_ptr->id == func_id) {
+	if (fp->id == func_id) {
 
 		// The function exist, only add time stamp
-		tnode_t *tp = f_ptr->thead;
+		tnode_t *tp = fp->thead;
 		while (tp->next != NULL)
 			tp = tp->next;
-
 		// Add element in the time list
 		tp->next = create_time_stamp();
-
 		return func_id;
 
 	} else {
 
 		// The function doesn't exist, create and add to list
-		f_ptr->next = create_function(func_id, fname);
-
+		fp->next = create_function(func_id, fname);
 		return func_id;
 	}
 
 	return -1;
 }
 
-void take_time_2(int func_id)
+
+void instrument_end(int func_id)
 {
 	// Search for <func_id>
 	fnode_t *fp = fhead;
@@ -106,5 +105,45 @@ void take_time_2(int func_id)
 		tp->dtime = clock() - tp->tstart;
 	}
 
+	return;
+}
+
+
+clock_t get_total_time(fnode_t *fp)
+{
+	clock_t total = 0;
+
+	tnode_t *tp = fp->thead;
+	while (tp != NULL) {
+		total += tp->dtime;
+		tp = tp->next;
+	}
+	return total;
+}
+
+
+int get_total_calls(fnode_t *fp)
+{
+	int calls = 0;
+
+	tnode_t *tp = fp->thead;
+	while (tp != NULL) {
+		calls ++;
+		tp = tp->next;
+	}
+	return calls;
+}
+
+void instrument_print(void)
+{
+	fnode_t *fp = fhead;
+	printf("Function\tTime\tCalls\n");
+	while (fp != NULL) {
+		clock_t time = get_total_time(fp);
+		int calls = get_total_calls(fp);
+		printf("%s :\t%d\t%d\n", fp->name, time, calls);
+
+		fp = fp->next;
+	}
 	return;
 }
