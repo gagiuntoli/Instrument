@@ -20,7 +20,7 @@
 #include "instrumentation.h"
 
 
-fnode_t *fhead = NULL;
+function_t *fun_array = NULL;
 
 
 tnode_t *create_time_stamp(void)
@@ -35,38 +35,36 @@ tnode_t *create_time_stamp(void)
 }
 
 
-fnode_t *create_function(int func_id, const char *fname)
+void create_function(int func_id, const char *fname)
 {
-	fnode_t *fp = malloc(sizeof(fnode_t));
+	if (func_id < 0 || func_id >= MAX_FUNC)
+		return;
 
-	strcpy(fp->name, fname);
-	fp->id = func_id;
-	fp->next = NULL;
+	fun_array[func_id].name = strdup(fname);
+	fun_array[func_id].thead = create_time_stamp();
 
-	// Create first element in the time list
-	fp->thead = create_time_stamp();
-
-	return fp;
+	return;
 }
 
 
 int instrument_start(int func_id, const char *fname)
 {
-	if (fhead == NULL) {
+	if (func_id < 0 || func_id >= MAX_FUNC)
+		return -1;
 
-		// Create and initialize list
-		fhead = create_function(func_id, fname);
-		return func_id;
+	if (fun_array == NULL) {
+		fun_array = malloc(MAX_FUNC * sizeof(function_t));
+		int i;
+		for (i = 0; i < MAX_FUNC; ++i) {
+			fun_array[i].name = NULL;
+			fun_array[func_id].thead = NULL;
+		}
 	}
 
-	fnode_t *fp = fhead;
-	while (fp->next != NULL && fp->id != func_id)
-		fp = fp->next;
-
-	if (fp->id == func_id) {
+	if (fun_array[func_id].name != NULL) {
 
 		// The function exist, only add time stamp
-		tnode_t *tp = fp->thead;
+		tnode_t *tp = fun_array[func_id].thead;
 		while (tp->next != NULL)
 			tp = tp->next;
 		// Add element in the time list
@@ -75,8 +73,8 @@ int instrument_start(int func_id, const char *fname)
 
 	} else {
 
-		// The function doesn't exist, create and add to list
-		fp->next = create_function(func_id, fname);
+		// Create new function
+		create_function(func_id, fname);
 		return func_id;
 	}
 
@@ -86,33 +84,27 @@ int instrument_start(int func_id, const char *fname)
 
 void instrument_end(int func_id)
 {
-	// Search for <func_id>
-	fnode_t *fp = fhead;
-	while (fp->next != NULL && fp->id != func_id)
-		fp = fp->next;
-
-	if (fp == NULL) {
-
+	if (func_id < 0 || func_id >= MAX_FUNC)
 		return;
 
-	} else {
+	tnode_t *tp = fun_array[func_id].thead;
+	while (tp->next != NULL)
+		tp = tp->next;
 
-		tnode_t *tp = fp->thead;
-		while (tp->next != NULL)
-			tp = tp->next;
-
-		tp->dtime = clock() - tp->tstart;
-	}
+	tp->dtime = clock() - tp->tstart;
 
 	return;
 }
 
 
-clock_t get_total_time(fnode_t *fp)
+clock_t get_total_time(int func_id)
 {
+	if (func_id < 0 || func_id >= MAX_FUNC)
+		return -1;
+
 	clock_t total = 0;
 
-	tnode_t *tp = fp->thead;
+	tnode_t *tp = fun_array[func_id].thead;
 	while (tp != NULL) {
 		total += tp->dtime;
 		tp = tp->next;
@@ -121,11 +113,14 @@ clock_t get_total_time(fnode_t *fp)
 }
 
 
-int get_total_calls(fnode_t *fp)
+int get_total_calls(int func_id)
 {
+	if (func_id < 0 || func_id >= MAX_FUNC)
+		return -1;
+
 	int calls = 0;
 
-	tnode_t *tp = fp->thead;
+	tnode_t *tp = fun_array[func_id].thead;
 	while (tp != NULL) {
 		calls ++;
 		tp = tp->next;
@@ -133,16 +128,17 @@ int get_total_calls(fnode_t *fp)
 	return calls;
 }
 
+
 void instrument_print(void)
 {
-	fnode_t *fp = fhead;
-	printf("Function         \tTime\tCalls\n");
-	while (fp != NULL) {
-		clock_t time = get_total_time(fp);
-		int calls = get_total_calls(fp);
-		printf("%-16s :\t%d\t%d\n", fp->name, time, calls);
+	printf("Function         \tTime\tCalls\tMean\n");
 
-		fp = fp->next;
+	int id = 0;
+	while (fun_array[id].name != NULL) {
+		clock_t time = get_total_time(id);
+		int calls = get_total_calls(id);
+		printf("%-16s :\t%d\t%d\n", fun_array[id].name, time, calls);
+		id ++;
 	}
 	return;
 }
