@@ -28,14 +28,14 @@
 #include <stdlib.h>
 
 
-#define INST_START take_time_1(__COUNTER__, __FUNCTION__);
-#define INST_END   take_time_2(__COUNTER__);
+#define INST_START int magic_1945 = take_time_1(__COUNTER__, __FUNCTION__);
+#define INST_END   take_time_2(magic_1945);
 
 
 struct tnode_t_ {
 
 	struct tnode_t_ *next;
-	clock_t time_s;
+	clock_t tstart;
 	clock_t dtime;
 
 };
@@ -46,26 +46,15 @@ typedef struct tnode_t_ tnode_t;
 struct fnode_t_ {
 
 	char name[128];
+	int id;
 	struct fnode_t_ *next;
-
 	tnode_t *thead;
-	tnode_t *ttail;
-
 };
 
 typedef struct fnode_t_ fnode_t;
 
 
-typedef struct {
-
-	int nfunc;
-	fnode_t *head;
-	fnode_t *tail;
-
-} func_list_t;
-
-
-void take_time_1(int func_id, const char *fname);
+int take_time_1(int func_id, const char *fname);
 void take_time_2(int func_id);
 
 #endif

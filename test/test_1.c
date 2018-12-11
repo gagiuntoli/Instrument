@@ -23,38 +23,20 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-
 #define N 100000
 
-uint64_t func_1(void)
+int func_1(void)
 {
-	int i;
-	int *v1 = malloc(N * sizeof(int));
-	int *v2 = malloc(N * sizeof(int));
-	for (i = 0; i < N; ++i) {
-		v1[i] = i;
-		v2[i] = i;
-	}
-	int *v3 = malloc(N * sizeof(int));
+	INST_START
 
-	for (i = 0; i < N; ++i)
-		v3[i] = v1[i] + v2[i];
+	int i = 1945 * 878;
 
-	uint64_t sum = 0;
-	for (i = 0; i < N; ++i)
-		sum += v3[i];
+	INST_END
 
-	free(v1);
-	free(v2);
-	free(v3);
-	return sum;
+	return i;
 }
 
 int main(void)
 {
-	INST_START
-
-	uint64_t sol = func_1();
-
-	INST_END
+	int sol = func_1();
 }
