@@ -18,7 +18,7 @@
  */
 
 
-#include "instrumentation.h"
+#include "instrument.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>

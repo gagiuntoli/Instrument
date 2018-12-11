@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "instrumentation.h"
+#include "instrument.h"
 
 
 static function_t *fun_array = NULL;
