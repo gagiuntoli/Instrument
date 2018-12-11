@@ -50,6 +50,7 @@ typedef struct {
 
 	char *name;
 	tnode_t *thead;
+	tnode_t *ttail;
 
 } function_t;
 
@@ -59,6 +60,7 @@ void create_function(int func_id, const char *fname);
 
 int instrument_start(int func_id, const char *fname);
 void instrument_end(int func_id);
+void free_tlist(tnode_t *thead);
 void instrument_print(void);
 
 double get_total_time(int func_id);

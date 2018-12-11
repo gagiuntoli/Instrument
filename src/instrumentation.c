@@ -41,6 +41,7 @@ void create_function(int func_id, const char *fname)
 
 	fun_array[func_id].name = strdup(fname);
 	fun_array[func_id].thead = create_time_stamp();
+	fun_array[func_id].ttail = fun_array[func_id].thead;
 
 	return;
 }
@@ -52,22 +53,24 @@ int instrument_start(int func_id, const char *fname)
 		return -1;
 
 	if (fun_array == NULL) {
+
+		// Only the First time
 		fun_array = malloc(MAX_FUNC * sizeof(function_t));
 		int i;
 		for (i = 0; i < MAX_FUNC; ++i) {
 			fun_array[i].name = NULL;
 			fun_array[func_id].thead = NULL;
+			fun_array[func_id].ttail = NULL;
 		}
 	}
 
 	if (fun_array[func_id].name != NULL) {
 
 		// The function exist, only add time stamp
-		tnode_t *tp = fun_array[func_id].thead;
-		while (tp->next != NULL)
-			tp = tp->next;
-		// Add element in the time list
+		tnode_t *tp = fun_array[func_id].ttail;
 		tp->next = create_time_stamp();
+		fun_array[func_id].ttail = tp->next;
+
 		return func_id;
 
 	} else {
@@ -86,10 +89,7 @@ void instrument_end(int func_id)
 	if (func_id < 0 || func_id >= MAX_FUNC)
 		return;
 
-	tnode_t *tp = fun_array[func_id].thead;
-	while (tp->next != NULL)
-		tp = tp->next;
-
+	tnode_t *tp = fun_array[func_id].ttail;
 	clock_gettime(CLOCK_MONOTONIC, &tp->end);
 
 	return;
@@ -147,6 +147,11 @@ double get_standard_deviation(int func_id, double mean)
 
 void free_tlist(tnode_t *thead)
 {
+	while (thead != NULL) {
+		tnode_t *ptr_aux = thead->next;
+		free(thead);
+		thead = ptr_aux;
+	}
 	return;
 }
 
