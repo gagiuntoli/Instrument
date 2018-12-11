@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 
 #define MAX_FUNC 50 // Maximum number of functions to instrument
@@ -60,8 +61,9 @@ int instrument_start(int func_id, const char *fname);
 void instrument_end(int func_id);
 void instrument_print(void);
 
-long get_total_time(int func_id);
+double get_total_time(int func_id);
 int get_total_calls(int func_id);
+double get_standard_deviation(int func_id, double mean);
 
 
 #endif

@@ -96,16 +96,16 @@ void instrument_end(int func_id)
 }
 
 
-long get_total_time(int func_id)
+double get_total_time(int func_id)
 {
 	if (func_id < 0 || func_id >= MAX_FUNC)
 		return -1;
 
-	long total = 0;
+	double total = 0.0;
 
 	tnode_t *tp = fun_array[func_id].thead;
 	while (tp != NULL) {
-		total += tp->end.tv_nsec - tp->start.tv_nsec;
+		total += (double) (tp->end.tv_nsec - tp->start.tv_nsec);
 		tp = tp->next;
 	}
 	return total;
@@ -128,6 +128,23 @@ int get_total_calls(int func_id)
 }
 
 
+double get_standard_deviation(int func_id, double mean)
+{
+	if (func_id < 0 || func_id >= MAX_FUNC)
+		return -1;
+
+	double total = 0.0;
+
+	tnode_t *tp = fun_array[func_id].thead;
+	while (tp != NULL) {
+		const double dt = ((double)(tp->end.tv_nsec - tp->start.tv_nsec)) * 1.0e-9;
+		total += (mean - dt) * (mean - dt);
+		tp = tp->next;
+	}
+	return sqrt(total);
+}
+
+
 void free_tlist(tnode_t *thead)
 {
 	return;
@@ -136,17 +153,23 @@ void free_tlist(tnode_t *thead)
 
 void instrument_print(void)
 {
-	printf("Function         \tTime\t\tCalls\t\tMean\n");
+	printf("\n");
+	printf("------------------------------------------------------------\n"
+	       "Instrument\n"
+	       "------------------------------------------------------------\n");
+	printf("Function         \tTime\t\tCalls\t\tMean\t\tStdev[\%]\n");
 
 	int id = 0;
 	while (fun_array[id].name != NULL) {
-		double time = ((double) get_total_time(id)) * 1.0e-9;
+		double time = ((double)get_total_time(id)) * 1.0e-9;
 		int calls = get_total_calls(id);
 		double mean = time / calls;
-		printf("%-16s :\t%lf\t%d\t\t%lf\n", fun_array[id].name, 
-		       time, calls, mean);
+		double stdev = get_standard_deviation(id, mean);
+		printf("%-16s :\t%lf\t%d\t\t%lf\t%lf\n", fun_array[id].name,
+		       time, calls, mean, stdev * 100);
 		id ++;
 	}
+	printf("\n");
 
 	// Free all memory
 	for (id = 0; id < MAX_FUNC; ++id) {
