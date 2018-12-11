@@ -1,0 +1,17 @@
+*.dat
+*.out*
+*.err
+*.aux
+*.log
+*.pdf
+*.png
+*.o
+.gdb_history
+build*
+*~
+
+libinstrument.a
+
+\#*
+.#*
+*.swp
