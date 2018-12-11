@@ -29,7 +29,7 @@
 #include <math.h>
 
 
-#define MAX_FUNC 50 // Maximum number of functions to instrument
+#define MAX_FUNC 15 // Maximum number of functions to instrument
 
 #define INST_START int magic_1945 = instrument_start(__COUNTER__, __FUNCTION__);
 #define INST_END   instrument_end(magic_1945);

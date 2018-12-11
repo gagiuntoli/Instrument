@@ -164,22 +164,24 @@ void instrument_print(void)
 	       "------------------------------------------------------------\n");
 	printf("Function         \tTime\t\tCalls\t\tMean\t\tStdev[\%]\n");
 
-	int id = 0;
-	while (fun_array[id].name != NULL) {
-		double time = ((double)get_total_time(id)) * 1.0e-9;
-		int calls = get_total_calls(id);
-		double mean = time / calls;
-		double stdev = get_standard_deviation(id, mean);
-		printf("%-16s :\t%lf\t%d\t\t%lf\t%lf\n", fun_array[id].name,
-		       time, calls, mean, stdev * 100);
-		id ++;
+	int id;
+	for (id = 0; id < MAX_FUNC; ++id) {
+
+		if (fun_array[id].name != NULL) {
+			double time = ((double)get_total_time(id)) * 1.0e-9;
+			int calls = get_total_calls(id);
+			double mean = time / calls;
+			double stdev = get_standard_deviation(id, mean);
+			printf("%-16s :\t%lf\t%d\t\t%lf\t%lf\n", fun_array[id].name,
+			       time, calls, mean, stdev * 100);
+
+			// Free all memory
+			free (fun_array[id].name);
+			free_tlist(fun_array[id].thead);
+			id ++;
+		}
 	}
 	printf("\n");
 
-	// Free all memory
-	for (id = 0; id < MAX_FUNC; ++id) {
-		free (fun_array[id].name);
-		free_tlist(fun_array[id].thead);
-	}
 	return;
 }
