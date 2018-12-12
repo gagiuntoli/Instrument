@@ -72,15 +72,15 @@ int main(void)
 	sol = func_2();
 	sol = func_2();
 
-	int calls_func_1 = get_total_calls(0);
-	assert(calls_func_1 == 2);
-
-	int calls_func_2 = get_total_calls(1);
-	assert(calls_func_2 == 4);
-
 	INST_END
 
-	int calls_main = get_total_calls(2);
+	int calls_func_1 = get_total_calls(1);
+	assert(calls_func_1 == 2);
+
+	int calls_func_2 = get_total_calls(2);
+	assert(calls_func_2 == 4);
+
+	int calls_main = get_total_calls(0);
 	assert(calls_main == 1);
 
 	INST_PRINT
