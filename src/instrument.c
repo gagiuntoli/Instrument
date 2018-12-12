@@ -115,10 +115,31 @@ double get_total_time(int func_id)
 
 	tnode_t *tp = fun_array[func_id].thead;
 	while (tp != NULL) {
-		total += (double) (tp->end.tv_nsec - tp->start.tv_nsec);
+		const double dt = \
+				  (tp->end.tv_sec * 1e9 + tp->end.tv_nsec)* 1.0e-9 - \
+				  (tp->start.tv_sec * 1e9 + tp->start.tv_nsec)* 1.0e-9 ;
+		total += dt;
 		tp = tp->next;
 	}
 	return total;
+}
+
+
+int print_time_list(int func_id)
+{
+	if (func_id < 0 || func_id >= fun_total)
+		return -1;
+
+	printf("func = %s ", fun_array[func_id].name);
+	tnode_t *tp = fun_array[func_id].thead;
+	while (tp != NULL) {
+		printf("start = %lf end = %lf ",
+		       (tp->start.tv_sec * 1.0e9 + tp->start.tv_nsec) * 1.0e-9,
+		       (tp->end.tv_sec * 1.0e9 + tp->end.tv_nsec) * 1.0e-9);
+		tp = tp->next;
+	}
+	printf("\n");
+	return 0;
 }
 
 
@@ -147,7 +168,9 @@ double get_standard_deviation(int func_id, double mean)
 
 	tnode_t *tp = fun_array[func_id].thead;
 	while (tp != NULL) {
-		const double dt = ((double)(tp->end.tv_nsec - tp->start.tv_nsec)) * 1.0e-9;
+		const double dt = (\
+				   (tp->end.tv_sec * 1e9 + tp->end.tv_nsec) - \
+				   (tp->start.tv_sec * 1e9 + tp->start.tv_nsec)) * 1.0e-9;
 		total += (mean - dt) * (mean - dt);
 		tp = tp->next;
 	}
@@ -176,7 +199,7 @@ void instrument_print(void)
 
 	int id;
 	for (id = 0; id < fun_total; ++id) {
-		double time = ((double)get_total_time(id)) * 1.0e-9;
+		double time = get_total_time(id);
 		int calls = get_total_calls(id);
 		double mean = time / calls;
 		double stdev = get_standard_deviation(id, mean);
@@ -184,6 +207,8 @@ void instrument_print(void)
 		       time, calls, mean, stdev * 100);
 	}
 	printf("\n");
+//	for (id = 0; id < fun_total; ++id)
+//		print_time_list(id);
 
 	// Free all memory
 	for (id = 0; id < fun_total; ++id) {
