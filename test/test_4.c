@@ -93,16 +93,19 @@ int main(void)
 	sol = func_1();
 	sol = func_2();
 
-	int calls_func_1 = get_total_calls(0);
+	INST_END
+
+	int calls_func_1 = get_total_calls(3);
 	assert(calls_func_1 == 3);
 
 	int calls_func_2 = get_total_calls(1);
 	assert(calls_func_2 == 5);
 
-	INST_END
+	int calls_func_3 = get_total_calls(2);
+	assert(calls_func_2 == 5);
 
-	int calls_main = get_total_calls(3);
-	//assert(calls_main == 1);
+	int calls_main = get_total_calls(0);
+	assert(calls_main == 1);
 
 	INST_PRINT
 }

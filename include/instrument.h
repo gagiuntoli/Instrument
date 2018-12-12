@@ -23,15 +23,15 @@
 
 #include <time.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
 
 #define MAX_FUNC 15 // Maximum number of functions to instrument
+#define STRING_L 64 // Max String Length 
 
-#define INST_START int magic_1945 = instrument_start(__COUNTER__, __FUNCTION__);
+#define INST_START int magic_1945 = instrument_start(__FUNCTION__);
 #define INST_END   instrument_end(magic_1945);
 #define INST_PRINT instrument_print();
 
@@ -49,7 +49,6 @@ typedef struct tnode_t_ tnode_t;
 
 typedef struct {
 
-	bool allocated;
 	char *name;
 	tnode_t *thead;
 	tnode_t *ttail;
@@ -57,13 +56,14 @@ typedef struct {
 } function_t;
 
 
-tnode_t *create_time_stamp(void);
-void create_function(int func_id, const char *fname);
-
-int instrument_start(int func_id, const char *fname);
+int instrument_start(const char *fname);
 void instrument_end(int func_id);
-void free_tlist(tnode_t *thead);
 void instrument_print(void);
+
+tnode_t *create_time_stamp(void);
+int create_function(const char *fname);
+
+void free_tlist(tnode_t *thead);
 
 double get_total_time(int func_id);
 int get_total_calls(int func_id);

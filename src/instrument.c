@@ -21,6 +21,7 @@
 
 
 static function_t *fun_array = NULL;
+static int fun_total = 0;
 
 
 tnode_t *create_time_stamp(void)
@@ -33,24 +34,33 @@ tnode_t *create_time_stamp(void)
 }
 
 
-void create_function(int func_id, const char *fname)
+int create_function(const char *fname)
 {
-	if (func_id < 0 || func_id >= MAX_FUNC)
-		return;
+	if (fun_total >= MAX_FUNC)
+		return -1;
 
-	fun_array[func_id].allocated = true;
-	fun_array[func_id].name = strndup(fname, 64);
-	fun_array[func_id].thead = create_time_stamp();
-	fun_array[func_id].ttail = fun_array[func_id].thead;
+	fun_array[fun_total].name = strndup(fname, 64);
+	fun_array[fun_total].thead = create_time_stamp();
+	fun_array[fun_total].ttail = fun_array[fun_total].thead;
 
-	return;
+	fun_total ++;
+
+	return fun_total - 1;
 }
 
 
-int instrument_start(int func_id, const char *fname)
+int get_func_id(const char *fname)
 {
-	if (func_id < 0 || func_id >= MAX_FUNC)
-		return -1;
+	int id;
+	for (id = 0; id < fun_total; ++id)
+		if (!strncmp(fun_array[id].name, fname, STRING_L * sizeof(char)))
+			return id;
+	return -1;
+}
+
+
+int instrument_start(const char *fname)
+{
 
 	if (fun_array == NULL) {
 
@@ -58,26 +68,25 @@ int instrument_start(int func_id, const char *fname)
 		fun_array = malloc(MAX_FUNC * sizeof(function_t));
 		int i;
 		for (i = 0; i < MAX_FUNC; ++i) {
-			fun_array[i].allocated = false;
 			fun_array[i].name = NULL;
 			fun_array[i].thead = NULL;
 			fun_array[i].ttail = NULL;
 		}
 	}
 
-	if (fun_array[func_id].allocated) {
+	int func_id = get_func_id(fname);
+
+	if (func_id < 0) {
+
+		return create_function(fname);
+
+	} else {
 
 		// The function exist, only add time stamp
 		tnode_t *tp = fun_array[func_id].ttail;
 		tp->next = create_time_stamp();
 		fun_array[func_id].ttail = tp->next;
 
-		return func_id;
-
-	} else {
-
-		// Create new function
-		create_function(func_id, fname);
 		return func_id;
 	}
 
@@ -87,9 +96,7 @@ int instrument_start(int func_id, const char *fname)
 
 void instrument_end(int func_id)
 {
-	if (func_id < 0 || func_id >= MAX_FUNC)
-		return;
-	if (fun_array[func_id].allocated == false)
+	if (func_id < 0 || func_id >= fun_total)
 		return;
 
 	tnode_t *tp = fun_array[func_id].ttail;
@@ -101,27 +108,44 @@ void instrument_end(int func_id)
 
 double get_total_time(int func_id)
 {
-	if (func_id < 0 || func_id >= MAX_FUNC)
-		return -1;
-	if (fun_array[func_id].allocated == false)
+	if (func_id < 0 || func_id >= fun_total)
 		return -1;
 
 	double total = 0.0;
 
 	tnode_t *tp = fun_array[func_id].thead;
 	while (tp != NULL) {
-		total += (double) (tp->end.tv_nsec - tp->start.tv_nsec);
+		const double dt = \
+				  (tp->end.tv_sec * 1e9 + tp->end.tv_nsec)* 1.0e-9 - \
+				  (tp->start.tv_sec * 1e9 + tp->start.tv_nsec)* 1.0e-9 ;
+		total += dt;
 		tp = tp->next;
 	}
 	return total;
 }
 
 
+int print_time_list(int func_id)
+{
+	if (func_id < 0 || func_id >= fun_total)
+		return -1;
+
+	printf("func = %s ", fun_array[func_id].name);
+	tnode_t *tp = fun_array[func_id].thead;
+	while (tp != NULL) {
+		printf("start = %lf end = %lf ",
+		       (tp->start.tv_sec * 1.0e9 + tp->start.tv_nsec) * 1.0e-9,
+		       (tp->end.tv_sec * 1.0e9 + tp->end.tv_nsec) * 1.0e-9);
+		tp = tp->next;
+	}
+	printf("\n");
+	return 0;
+}
+
+
 int get_total_calls(int func_id)
 {
-	if (func_id < 0 || func_id >= MAX_FUNC)
-		return -1;
-	if (fun_array[func_id].allocated == false)
+	if (func_id < 0 || func_id >= fun_total)
 		return -1;
 
 	int calls = 0;
@@ -137,16 +161,16 @@ int get_total_calls(int func_id)
 
 double get_standard_deviation(int func_id, double mean)
 {
-	if (func_id < 0 || func_id >= MAX_FUNC)
-		return -1;
-	if (fun_array[func_id].allocated == false)
+	if (func_id < 0 || func_id >= fun_total)
 		return -1;
 
 	double total = 0.0;
 
 	tnode_t *tp = fun_array[func_id].thead;
 	while (tp != NULL) {
-		const double dt = ((double)(tp->end.tv_nsec - tp->start.tv_nsec)) * 1.0e-9;
+		const double dt = (\
+				   (tp->end.tv_sec * 1e9 + tp->end.tv_nsec) - \
+				   (tp->start.tv_sec * 1e9 + tp->start.tv_nsec)) * 1.0e-9;
 		total += (mean - dt) * (mean - dt);
 		tp = tp->next;
 	}
@@ -174,24 +198,22 @@ void instrument_print(void)
 	printf("Function         \t\tTime\t\tCalls\t\tMean\t\tStdev[\%]\n");
 
 	int id;
-	for (id = 0; id < MAX_FUNC; ++id) {
-		if (fun_array[id].allocated) {
-			double time = ((double)get_total_time(id)) * 1.0e-9;
-			int calls = get_total_calls(id);
-			double mean = time / calls;
-			double stdev = get_standard_deviation(id, mean);
-			printf("%-24s :\t%lf\t%d\t\t%lf\t%lf\n", fun_array[id].name,
-			       time, calls, mean, stdev * 100);
-		}
+	for (id = 0; id < fun_total; ++id) {
+		double time = get_total_time(id);
+		int calls = get_total_calls(id);
+		double mean = time / calls;
+		double stdev = get_standard_deviation(id, mean);
+		printf("%-24s :\t%lf\t%d\t\t%lf\t%lf\n", fun_array[id].name,
+		       time, calls, mean, stdev * 100);
 	}
 	printf("\n");
+//	for (id = 0; id < fun_total; ++id)
+//		print_time_list(id);
 
 	// Free all memory
-	for (id = 0; id < MAX_FUNC; ++id) {
-		if (fun_array[id].allocated) {
-			free(fun_array[id].name);
-			free_tlist(fun_array[id].thead);
-		}
+	for (id = 0; id < fun_total; ++id) {
+		free(fun_array[id].name);
+		free_tlist(fun_array[id].thead);
 	}
 	free(fun_array);
 
