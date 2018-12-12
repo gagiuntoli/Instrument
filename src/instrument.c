@@ -26,7 +26,6 @@ static function_t *fun_array = NULL;
 tnode_t *create_time_stamp(void)
 {
 	tnode_t *tp = malloc(sizeof(tnode_t));
-
 	clock_gettime(CLOCK_MONOTONIC, &tp->start);
 	tp->next = NULL;
 
@@ -40,7 +39,7 @@ void create_function(int func_id, const char *fname)
 		return;
 
 	fun_array[func_id].allocated = true;
-	fun_array[func_id].name = strdup(fname);
+	fun_array[func_id].name = strndup(fname, 64);
 	fun_array[func_id].thead = create_time_stamp();
 	fun_array[func_id].ttail = fun_array[func_id].thead;
 
@@ -172,17 +171,16 @@ void instrument_print(void)
 	printf("------------------------------------------------------------\n"
 	       "Instrument\n"
 	       "------------------------------------------------------------\n");
-	printf("Function         \tTime\t\tCalls\t\tMean\t\tStdev[\%]\n");
+	printf("Function         \t\tTime\t\tCalls\t\tMean\t\tStdev[\%]\n");
 
 	int id;
 	for (id = 0; id < MAX_FUNC; ++id) {
-
 		if (fun_array[id].allocated) {
 			double time = ((double)get_total_time(id)) * 1.0e-9;
 			int calls = get_total_calls(id);
 			double mean = time / calls;
 			double stdev = get_standard_deviation(id, mean);
-			printf("%-16s :\t%lf\t%d\t\t%lf\t%lf\n", fun_array[id].name,
+			printf("%-24s :\t%lf\t%d\t\t%lf\t%lf\n", fun_array[id].name,
 			       time, calls, mean, stdev * 100);
 		}
 	}

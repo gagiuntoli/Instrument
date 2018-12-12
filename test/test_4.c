@@ -25,6 +25,8 @@
 
 #define N 100000
 
+int func_3(void);
+
 int func_1(void)
 {
 	INST_START
@@ -53,6 +55,7 @@ int func_2(void)
 	for (i = 0; i < N; ++i)
 		j -= i;
 
+	func_3();
 	INST_END
 
 	return j;
@@ -81,18 +84,20 @@ int main(void)
 
 	int sol;
 
-	sol = func_1();
 	sol = func_2();
 	sol = func_1();
+	sol = func_1();
 	sol = func_2();
 	sol = func_2();
+	sol = func_2();
+	sol = func_1();
 	sol = func_2();
 
 	int calls_func_1 = get_total_calls(0);
-	assert(calls_func_1 == 2);
+	assert(calls_func_1 == 3);
 
 	int calls_func_2 = get_total_calls(1);
-	assert(calls_func_2 == 4);
+	assert(calls_func_2 == 5);
 
 	INST_END
 
