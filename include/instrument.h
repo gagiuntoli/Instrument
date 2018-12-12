@@ -39,7 +39,8 @@
 struct tnode_t_ {
 
 	struct tnode_t_ *next;
-	struct timespec start, end;
+	struct timespec start;
+	struct timespec end;
 
 };
 
@@ -48,6 +49,7 @@ typedef struct tnode_t_ tnode_t;
 
 typedef struct {
 
+	bool allocated;
 	char *name;
 	tnode_t *thead;
 	tnode_t *ttail;

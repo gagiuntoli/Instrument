@@ -27,8 +27,8 @@ tnode_t *create_time_stamp(void)
 {
 	tnode_t *tp = malloc(sizeof(tnode_t));
 
-	tp->next = NULL;
 	clock_gettime(CLOCK_MONOTONIC, &tp->start);
+	tp->next = NULL;
 
 	return tp;
 }
@@ -39,6 +39,7 @@ void create_function(int func_id, const char *fname)
 	if (func_id < 0 || func_id >= MAX_FUNC)
 		return;
 
+	fun_array[func_id].allocated = true;
 	fun_array[func_id].name = strdup(fname);
 	fun_array[func_id].thead = create_time_stamp();
 	fun_array[func_id].ttail = fun_array[func_id].thead;
@@ -58,13 +59,14 @@ int instrument_start(int func_id, const char *fname)
 		fun_array = malloc(MAX_FUNC * sizeof(function_t));
 		int i;
 		for (i = 0; i < MAX_FUNC; ++i) {
+			fun_array[i].allocated = false;
 			fun_array[i].name = NULL;
-			fun_array[func_id].thead = NULL;
-			fun_array[func_id].ttail = NULL;
+			fun_array[i].thead = NULL;
+			fun_array[i].ttail = NULL;
 		}
 	}
 
-	if (fun_array[func_id].name != NULL) {
+	if (fun_array[func_id].allocated) {
 
 		// The function exist, only add time stamp
 		tnode_t *tp = fun_array[func_id].ttail;
@@ -88,6 +90,8 @@ void instrument_end(int func_id)
 {
 	if (func_id < 0 || func_id >= MAX_FUNC)
 		return;
+	if (fun_array[func_id].allocated == false)
+		return;
 
 	tnode_t *tp = fun_array[func_id].ttail;
 	clock_gettime(CLOCK_MONOTONIC, &tp->end);
@@ -99,6 +103,8 @@ void instrument_end(int func_id)
 double get_total_time(int func_id)
 {
 	if (func_id < 0 || func_id >= MAX_FUNC)
+		return -1;
+	if (fun_array[func_id].allocated == false)
 		return -1;
 
 	double total = 0.0;
@@ -116,6 +122,8 @@ int get_total_calls(int func_id)
 {
 	if (func_id < 0 || func_id >= MAX_FUNC)
 		return -1;
+	if (fun_array[func_id].allocated == false)
+		return -1;
 
 	int calls = 0;
 
@@ -131,6 +139,8 @@ int get_total_calls(int func_id)
 double get_standard_deviation(int func_id, double mean)
 {
 	if (func_id < 0 || func_id >= MAX_FUNC)
+		return -1;
+	if (fun_array[func_id].allocated == false)
 		return -1;
 
 	double total = 0.0;
@@ -167,21 +177,25 @@ void instrument_print(void)
 	int id;
 	for (id = 0; id < MAX_FUNC; ++id) {
 
-		if (fun_array[id].name != NULL) {
+		if (fun_array[id].allocated) {
 			double time = ((double)get_total_time(id)) * 1.0e-9;
 			int calls = get_total_calls(id);
 			double mean = time / calls;
 			double stdev = get_standard_deviation(id, mean);
 			printf("%-16s :\t%lf\t%d\t\t%lf\t%lf\n", fun_array[id].name,
 			       time, calls, mean, stdev * 100);
-
-			// Free all memory
-			free (fun_array[id].name);
-			free_tlist(fun_array[id].thead);
-			id ++;
 		}
 	}
 	printf("\n");
+
+	// Free all memory
+	for (id = 0; id < MAX_FUNC; ++id) {
+		if (fun_array[id].allocated) {
+			free(fun_array[id].name);
+			free_tlist(fun_array[id].thead);
+		}
+	}
+	free(fun_array);
 
 	return;
 }
