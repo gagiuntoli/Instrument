@@ -214,8 +214,13 @@ void instrument_print(void)
 	for (id = 0; id < fun_total; ++id) {
 		free(fun_array[id].name);
 		free_tlist(fun_array[id].thead);
+		fun_array[id].name = NULL;
+		fun_array[id].thead = NULL;
+		fun_array[id].ttail = NULL;
 	}
 	free(fun_array);
+	fun_array = NULL;
+	fun_total = 0;
 
 	return;
 }
